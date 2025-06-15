@@ -5,13 +5,11 @@ from matplotlib import cm, pyplot as plt
 import time
 import torch
 import sys, os, math
-from detect_human import HumanDetection
 
-# import matplotlib.pyplot as plt
-# sys.path.append('/home/dai/MCGaze/OpenPoseNet/')
-# from suspicious_check import SuspiciousChecking
-sys.path.insert(0, '/home/dh11255z/Documents/computer-rendering/OpenPoseNet/')
+# Remove this line, not needed anymore:
+# sys.path.insert(0, '/home/dh11255z/Documents/proctor_agent_base/OpenPoseNet/')
 
+# Use relative imports for local modules
 from util.decode_pose import decode_pose
 from util.openpose_net import OpenPoseNet
 
@@ -20,9 +18,13 @@ from util.openpose_net import OpenPoseNet
 class PoseEstimation:
     def __init__(self):
         self.net = OpenPoseNet()
-        # self.orig_image = cv2.imread(image_path)
-        weight_file_path = '/home/dh11255z/Documents/computer-rendering/OpenPoseNet/weights/pose_model_scratch.pth'
-        self.net_weights = torch.load(weight_file_path, map_location={'cuda:0': 'cpu'})
+        weight_file_path = os.path.join(os.path.dirname(__file__), 'weights', 'pose_model_scratch.pth')
+        # Update torch.load with weights_only=True
+        self.net_weights = torch.load(
+            weight_file_path, 
+            map_location={'cuda:0': 'cpu'},
+            weights_only=True  # Add this parameter
+        )
         keys = list(self.net_weights.keys())
         # print(keys)
         weights_load = {}
@@ -34,8 +36,6 @@ class PoseEstimation:
         state = self.net.state_dict()
         state.update(weights_load)
         self.net.load_state_dict(state)
-
-        self.human_detector = HumanDetection()
 
         print('Pose Estimation Model Loaded')
 
@@ -99,7 +99,7 @@ class PoseEstimation:
         return result_img, joint_list.tolist(), person_to_joint_assoc.tolist(), heatmaps, pafs
 
     def video_pose_estimation(self, video_path):  # NOT DONE YET
-        output_path = "/home/dh11255z/Documents/computer-rendering/results/result.mp4"
+        output_path = "/home/dh11255z/Documents/proctor_agent_base/results/result.mp4"
         cap = cv2.VideoCapture(video_path)
         # Get video properties for creating the output video
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -150,7 +150,7 @@ class PoseEstimation:
                 'custom': keypoints_array.astype(np.float32)
             }
         }
-        np.savez_compressed("/home/dh11255z/Documents/computer-rendering/results/result.npz", positions_2d=positions_2d)
+        np.savez_compressed("/home/dh11255z/Documents/proctor_agent_base/results/result.npz", positions_2d=positions_2d)
 
         return joint_list, person_to_joint_assoc
 
@@ -198,7 +198,7 @@ class PoseEstimation:
                 
 
 pose_estimator = PoseEstimation()
-video_path = '/home/dh11255z/Documents/computer-rendering/test.mp4'
+video_path = '/home/dh11255z/Documents/proctor_agent_base/test.mp4'
 _, _ = pose_estimator.video_pose_estimation(video_path)
 # res_frame = pose_estimator.estimate_pose_and_checking(cv2.imread('/home/dai/MCGaze/IMG_4721.jpg'))
 # cv2.imwrite('/home/dai/MCGaze/IMG_4721_res.jpg', res_frame)
