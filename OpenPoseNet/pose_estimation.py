@@ -6,9 +6,6 @@ import time
 import torch
 import sys, os, math
 
-# Remove this line, not needed anymore:
-# sys.path.insert(0, '/home/dh11255z/Documents/proctor_agent_base/OpenPoseNet/')
-
 # Use relative imports for local modules
 from util.decode_pose import decode_pose
 from util.openpose_net import OpenPoseNet
@@ -18,7 +15,8 @@ from util.openpose_net import OpenPoseNet
 class PoseEstimation:
     def __init__(self):
         self.net = OpenPoseNet()
-        weight_file_path = os.path.join(os.path.dirname(__file__), 'weights', 'pose_model_scratch.pth')
+        self.current_dir = os.path.dirname(os.path.abspath(__file__))
+        weight_file_path = os.path.join(self.current_dir, 'weights', 'pose_model_scratch.pth')
         # Update torch.load with weights_only=True
         self.net_weights = torch.load(
             weight_file_path, 
@@ -97,9 +95,19 @@ class PoseEstimation:
 
         # cv2.imwrite(output_image_path, result_img)
         return result_img, joint_list.tolist(), person_to_joint_assoc.tolist(), heatmaps, pafs
+    
+    def image_pose_estimation(self, image_path):
+        output_path = os.path.join(self.current_dir, "result.jpg")
+        orig_image = cv2.imread(image_path)
+        result_img, joint_list, person_to_joint_assoc, heatmaps, pafs = self.estimate_pose(orig_image)
 
-    def video_pose_estimation(self, video_path):  # NOT DONE YET
-        output_path = "/home/dh11255z/Documents/proctor_agent_base/results/result.mp4"
+        # Save the result image
+        cv2.imwrite(output_path, result_img)
+
+        return joint_list, person_to_joint_assoc
+
+    def video_pose_estimation(self, video_path, save_npz=False):  # NOT DONE YET
+        output_path = os.path.join(self.current_dir, "result.mp4")
         cap = cv2.VideoCapture(video_path)
         # Get video properties for creating the output video
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -144,13 +152,16 @@ class PoseEstimation:
         cv2.destroyAllWindows()
 
         # Save as .npz
-        keypoints_array = np.stack(all_coco17_keypoints)  # [frames, 17, 2]
-        positions_2d = {
-            'S1': {
-                'custom': keypoints_array.astype(np.float32)
+        if save_npz:
+            keypoints_array = np.stack(all_coco17_keypoints)  # [frames, 17, 2]
+            positions_2d = {
+                'S1': {
+                    'custom': keypoints_array.astype(np.float32)
+                }
             }
-        }
-        np.savez_compressed("/home/dh11255z/Documents/proctor_agent_base/results/result.npz", positions_2d=positions_2d)
+
+            npz_file_path = os.path.join(self.current_dir, "result.npz")
+            np.savez_compressed(npz_file_path, positions_2d=positions_2d)
 
         return joint_list, person_to_joint_assoc
 
