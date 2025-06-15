@@ -7,8 +7,8 @@ import torch
 import sys, os, math
 
 # Use relative imports for local modules
-from util.decode_pose import decode_pose
-from util.openpose_net import OpenPoseNet
+from .util.decode_pose import decode_pose
+from .util.openpose_net import OpenPoseNet
 
 # net = OpenPoseNet()
 
@@ -208,9 +208,9 @@ class PoseEstimation:
         return angle_ls, time_render
                 
 
-pose_estimator = PoseEstimation()
-video_path = '/home/dh11255z/Documents/proctor_agent_base/test.mp4'
-_, _ = pose_estimator.video_pose_estimation(video_path)
+# pose_estimator = PoseEstimation()
+# video_path = '/home/dh11255z/Documents/proctor_agent_base/test.mp4'
+# _, _ = pose_estimator.video_pose_estimation(video_path)
 # res_frame = pose_estimator.estimate_pose_and_checking(cv2.imread('/home/dai/MCGaze/IMG_4721.jpg'))
 # cv2.imwrite('/home/dai/MCGaze/IMG_4721_res.jpg', res_frame)
 # cap = cv2.VideoCapture('/home/dai/MCGaze/IMG_4724.mp4')

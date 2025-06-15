@@ -13,7 +13,7 @@ from scipy import misc, ndimage
 import torch
 import torch.utils.data as data
 
-from util.data_augumentation import Compose, get_anno, add_neck, aug_scale, aug_rotate, aug_croppad, aug_flip, remove_illegal_joint, Normalize_Tensor, no_Normalize_Tensor
+from .data_augumentation import Compose, get_anno, add_neck, aug_scale, aug_rotate, aug_croppad, aug_flip, remove_illegal_joint, Normalize_Tensor, no_Normalize_Tensor
 
 
 def putGaussianMaps(center, accumulate_confid_map, params_transform):
